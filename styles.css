@@ -82,7 +82,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 40px;
+    padding: 15px 40px;
 }
 
 .logo {
@@ -93,7 +93,7 @@ header {
 }
 
 .logo-img {
-    height: 60px;
+    height: 100px;
     width: auto;
     transition: all 0.3s ease;
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));

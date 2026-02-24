@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Crew Application - Payment System</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Progress Steps */
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: #f9f9f9;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step::before {
+            content: attr(data-step);
+            display: block;
+            width: 40px;
+            height: 40px;
+            background: #ddd;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            line-height: 40px;
+            font-weight: bold;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .step.active::before {
+            background: #0066cc;
+            color: #fff;
+        }
+
+        .step.completed::before {
+            background: #28a745;
+            color: #fff;
+            content: '✓';
+        }
+
+        .step-title {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .step.active .step-title {
+            color: #0066cc;
+            font-weight: bold;
+        }
+
+        /* Form Sections */
+        .form-section {
+            display: none;
+            padding: 40px;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #0066cc;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .required {
+            color: #dc3545;
+        }
+
+        .error {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .form-group.has-error input,
+        .form-group.has-error select {
+            border-color: #dc3545;
+        }
+
+        .form-group.has-error .error {
+            display: block;
+        }
+
+        /* Product Selection */
+        .product-options {
+            display: grid;
+            gap: 15px;
+        }
+
+        .product-option {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .product-option:hover {
+            border-color: #0066cc;
+            background: #f0f7ff;
+        }
+
+        .product-option input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .product-option.selected {
+            border-color: #0066cc;
+            background: #e6f2ff;
+        }
+
+        .product-header {
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .product-price {
+            color: #0066cc;
+            font-size: 24px;
+            margin-left: auto;
+        }
+
+        /* Add-ons */
+        .addon-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .addon-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-right: 15px;
+        }
+
+        .addon-details {
+            flex: 1;
+        }
+
+        .addon-name {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .addon-price {
+            color: #0066cc;
+            font-size: 18px;
+        }
+
+        .addon-quantity {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .qty-btn {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #0066cc;
+            background: #fff;
+            color: #0066cc;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .qty-btn:hover {
+            background: #0066cc;
+            color: #fff;
+        }
+
+        .qty-input {
+            width: 50px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        /* Payment Summary */
+        .payment-summary {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .summary-row.total {
+            font-size: 20px;
+            font-weight: bold;
+            color: #0066cc;
+            padding-top: 10px;
+            border-top: 2px solid #ddd;
+            margin-top: 10px;
+        }
+
+        /* Stripe Card Element */
+        #card-element {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            background: #fff;
+        }
+
+        #card-errors {
+            color: #dc3545;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        /* File Upload */
+        .file-upload {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload:hover {
+            border-color: #0066cc;
+            background: #f0f7ff;
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .file-list {
+            margin-top: 15px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .remove-file {
+            color: #dc3545;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: #0066cc;
+            color: #fff;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: #0052a3;
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        /* Success Message */
+        .success-message {
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .success-icon {
+            font-size: 80px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .success-message h2 {
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+
+        .success-message p {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0066cc;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Checkbox */
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-top: 3px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .progress-container {
+                padding: 20px 15px;
+            }
+
+            .form-section {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .step-title {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>✈️ Flight Crew ID Application</h1>
+        <p>Aviation Flight Crews Application</p>
+    </div>
+
+    <div class="container">
+        <!-- Progress Steps -->
+        <div class="progress-container">
+            <div class="step active" data-step="1">
+                <div class="step-title">Account Setup</div>
+            </div>
+            <div class="step" data-step="2">
+                <div class="step-title">Application</div>
+            </div>
+            <div class="step" data-step="3">
+                <div class="step-title">Document Upload</div>
+            </div>
+            <div class="step" data-step="4">
+                <div class="step-title">Payment</div>
+            </div>
+        </div>
+
+        <form id="application-form">
+            <!-- Step 1: Account Setup -->
+            <div class="form-section active" data-step="1">
+                <h2>Step 1: Account Setup</h2>
+                <p style="margin-bottom: 30px; color: #666;">Create your account to get started</p>
+
+                <div class="form-group">
+                    <label>First Name <span class="required">*</span></label>
+                    <input type="text" name="firstName" required>
+                    <span class="error">First name is required</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Last Name <span class="required">*</span></label>
+                    <input type="text" name="lastName" required>
+                    <span class="error">Last name is required</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number <span class="required">*</span></label>
+                    <input type="tel" name="phone" placeholder="(555) 123-4567" required>
+                    <span class="error">Valid phone number is required</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address <span class="required">*</span></label>
+                    <input type="email" name="email" required>
+                    <span class="error">Valid email is required</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Confirm Email <span class="required">*</span></label>
+                    <input type="email" name="confirmEmail" required>
+                    <span class="error">Emails must match</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Create Password <span class="required">*</span></label>
+                    <input type="password" name="password" required>
+                    <small>Must be at least 8 characters</small>
+                    <span class="error">Password must be at least 8 characters</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Confirm Password <span class="required">*</span></label>
+                    <input type="password" name="confirmPassword" required>
+                    <span class="error">Passwords must match</span>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="understand" name="understand" required>
+                        <label for="understand">
+                            I understand that I will be required to submit qualifying documentation to receive my Flight Crew ID (FAA Pilot Certificate, Valid Driver's License, for Flight Attendants - Valid Training Certificate)
+                        </label>
+                    </div>
+                    <span class="error">You must acknowledge this requirement</span>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn btn-primary" onclick="nextStep()">Next Step →</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Application Details -->
+            <div class="form-section" data-step="2">
+                <h2>Step 2: Flight Crew ID Selection</h2>
+                <p style="margin-bottom: 30px; color: #666;">Select your ID duration and any add-ons</p>
+
+                <div class="form-group">
+                    <label>Select Your Flight Crew ID <span class="required">*</span></label>
+                    <div class="product-options">
+                        <div class="product-option" onclick="selectProduct('two-year', 98)">
+                            <div class="product-header">
+                                <input type="radio" name="idDuration" value="two-year" required>
+                                Two Year ID
+                                <span class="product-price">$98.00</span>
+                            </div>
+                            <small>Best value - Save with our 2-year option</small>
+                        </div>
+                        <div class="product-option" onclick="selectProduct('one-year', 78)">
+                            <div class="product-header">
+                                <input type="radio" name="idDuration" value="one-year" required>
+                                One Year ID
+                                <span class="product-price">$78.00</span>
+                            </div>
+                            <small>Standard annual ID</small>
+                        </div>
+                    </div>
+                    <small style="margin-top: 15px;">$20.00 shipping and handling will be added at checkout</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Add-Ons (Optional)</label>
+                    
+                    <div class="addon-item">
+                        <div class="addon-details">
+                            <div class="addon-name">Official Crew Lanyard</div>
+                            <div class="addon-price">$10.00 each</div>
+                            <small>Complimentary lanyard included with ID</small>
+                        </div>
+                        <div class="addon-quantity">
+                            <button type="button" class="qty-btn" onclick="changeQuantity('lanyard', -1)">-</button>
+                            <input type="number" class="qty-input" id="lanyard-qty" value="0" min="0" readonly>
+                            <button type="button" class="qty-btn" onclick="changeQuantity('lanyard', 1)">+</button>
+                        </div>
+                    </div>
+
+                    <div class="addon-item">
+                        <div class="addon-details">
+                            <div class="addon-name">Badge Protector</div>
+                            <div class="addon-price">$10.00 each</div>
+                            <small>Protective sleeve for your ID</small>
+                        </div>
+                        <div class="addon-quantity">
+                            <button type="button" class="qty-btn" onclick="changeQuantity('protector', -1)">-</button>
+                            <input type="number" class="qty-input" id="protector-qty" value="0" min="0" readonly>
+                            <button type="button" class="qty-btn" onclick="changeQuantity('protector', 1)">+</button>
+                        </div>
+                    </div>
+
+                    <div class="addon-item">
+                        <div class="addon-details">
+                            <div class="addon-name">Custom Luggage Tag</div>
+                            <div class="addon-price">$10.00 each</div>
+                            <small>Personalized luggage identification</small>
+                        </div>
+                        <div class="addon-quantity">
+                            <button type="button" class="qty-btn" onclick="changeQuantity('luggage', -1)">-</button>
+                            <input type="number" class="qty-input" id="luggage-qty" value="0" min="0" readonly>
+                            <button type="button" class="qty-btn" onclick="changeQuantity('luggage', 1)">+</button>
+                        </div>
+                    </div>
+
+                    <div class="addon-item">
+                        <div class="addon-details">
+                            <div class="addon-name">Duplicate Backup Badges</div>
+                            <div class="addon-price">$55.00</div>
+                            <small>Two additional backup ID cards</small>
+                        </div>
+                        <div class="addon-quantity">
+                            <button type="button" class="qty-btn" onclick="changeQuantity('backup', -1)">-</button>
+                            <input type="number" class="qty-input" id="backup-qty" value="0" min="0" max="1" readonly>
+                            <button type="button" class="qty-btn" onclick="changeQuantity('backup', 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="payment-summary">
+                    <div class="summary-row">
+                        <span>Selected ID:</span>
+                        <span id="selected-id-text">Not selected</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Add-ons:</span>
+                        <span id="addons-total">$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping & Handling:</span>
+                        <span>$20.00</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Order Total:</span>
+                        <span id="grand-total">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn btn-secondary" onclick="prevStep()">← Previous</button>
+                    <button type="button" class="btn btn-primary" onclick="nextStep()">Next Step →</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Document Upload -->
+            <div class="form-section" data-step="3">
+                <h2>Step 3: Document Upload</h2>
+                <p style="margin-bottom: 30px; color: #666;">Upload your qualifying documentation</p>
+
+                <div class="form-group">
+                    <label>Document Type <span class="required">*</span></label>
+                    <select name="documentType" required>
+                        <option value="">Select document type</option>
+                        <option value="faa-pilot">FAA Pilot Certificate</option>
+                        <option value="drivers-license">Valid Driver's License</option>
+                        <option value="training-cert">Flight Attendant Training Certificate</option>
+                        <option value="mechanic-cert">A&P Mechanic Certificate</option>
+                        <option value="other">Other Qualifying Document</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Upload Documents <span class="required">*</span></label>
+                    <div class="file-upload" onclick="document.getElementById('file-input').click()">
+                        <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png" onchange="handleFiles(this.files)">
+                        <p>📁 Click to upload or drag and drop</p>
+                        <small>Accepted formats: PDF, JPG, PNG (Max 5MB each)</small>
+                    </div>
+                    <div class="file-list" id="file-list"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Additional Notes (Optional)</label>
+                    <textarea name="notes" rows="4" placeholder="Any additional information you'd like to provide..."></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn btn-secondary" onclick="prevStep()">← Previous</button>
+                    <button type="button" class="btn btn-primary" onclick="nextStep()">Next Step →</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Payment -->
+            <div class="form-section" data-step="4">
+                <h2>Step 4: Payment Information</h2>
+                <p style="margin-bottom: 30px; color: #666;">Enter your payment details to complete your order</p>
+
+                <div class="payment-summary">
+                    <div class="summary-row">
+                        <span>Selected ID:</span>
+                        <span id="final-id-text">Not selected</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Add-ons:</span>
+                        <span id="final-addons-total">$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping & Handling:</span>
+                        <span>$20.00</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total Amount:</span>
+                        <span id="final-grand-total">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Card Information <span class="required">*</span></label>
+                    <div id="card-element"></div>
+                    <div id="card-errors"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Billing Address <span class="required">*</span></label>
+                    <input type="text" name="billingAddress" placeholder="Street Address" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <input type="text" name="billingCity" placeholder="City" required>
+                    </div>
+                    <div class="form-group">
+                        <select name="billingState" required>
+                            <option value="">Select State</option>
+                            <option value="AL">Alabama</option>
+                            <option value="AK">Alaska</option>
+                            <option value="AZ">Arizona</option>
+                            <option value="CA">California</option>
+                            <option value="FL">Florida</option>
+                            <option value="NY">New York</option>
+                            <option value="TX">Texas</option>
+                            <!-- Add all states -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" name="billingZip" placeholder="ZIP Code" required>
+                </div>
+
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Processing your payment...</p>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn btn-secondary" onclick="prevStep()">← Previous</button>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">Complete Payment</button>
+                </div>
+            </div>
+
+            <!-- Success Message -->
+            <div class="form-section" data-step="5">
+                <div class="success-message">
+                    <div class="success-icon">✓</div>
+                    <h2>Application Submitted Successfully!</h2>
+                    <p>Thank you for your application.</p>
+                    <p>Your order number is: <strong>#<span id="order-number"></span></strong></p>
+                    <p style="margin-top: 20px;">You will receive a confirmation email shortly at:</p>
+                    <p><strong id="confirmation-email"></strong></p>
+                    <p style="margin-top: 30px; color: #666;">Your Flight Crew ID will be processed and shipped within 5-7 business days.</p>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Initialize Stripe (Replace with your actual publishable key)
+        const stripe = Stripe('pk_test_YOUR_PUBLISHABLE_KEY_HERE');
+        const elements = stripe.elements();
+        const cardElement = elements.create('card', {
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: '#32325d',
+                    '::placeholder': {
+                        color: '#aab7c4',
+                    },
+                },
+            },
+        });
+
+        // Mount card element when reaching payment step
+        let cardMounted = false;
+
+        // Application state
+        let currentStep = 1;
+        let orderData = {
+            basePrice: 0,
+            addons: {
+                lanyard: 0,
+                protector: 0,
+                luggage: 0,
+                backup: 0
+            },
+            shipping: 20,
+            files: []
+        };
+
+        // Update progress steps
+        function updateProgress() {
+            document.querySelectorAll('.step').forEach((step, index) => {
+                const stepNum = index + 1;
+                if (stepNum < currentStep) {
+                    step.classList.add('completed');
+                    step.classList.remove('active');
+                } else if (stepNum === currentStep) {
+                    step.classList.add('active');
+                    step.classList.remove('completed');
+                } else {
+                    step.classList.remove('active', 'completed');
+                }
+            });
+
+            document.querySelectorAll('.form-section').forEach((section, index) => {
+                section.classList.remove('active');
+                if (index + 1 === currentStep) {
+                    section.classList.add('active');
+                }
+            });
+
+            // Mount Stripe card element when reaching payment step
+            if (currentStep === 4 && !cardMounted) {
+                cardElement.mount('#card-element');
+                cardMounted = true;
+            }
+        }
+
+        // Validation functions
+        function validateStep(step) {
+            const section = document.querySelector(`.form-section[data-step="${step}"]`);
+            const inputs = section.querySelectorAll('input[required], select[required], textarea[required]');
+            let isValid = true;
+
+            inputs.forEach(input => {
+                const formGroup = input.closest('.form-group');
+                formGroup.classList.remove('has-error');
+
+                if (!input.value.trim()) {
+                    formGroup.classList.add('has-error');
+                    isValid = false;
+                }
+
+                // Email validation
+                if (input.type === 'email' && input.value) {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(input.value)) {
+                        formGroup.classList.add('has-error');
+                        isValid = false;
+                    }
+                }
+
+                // Email confirmation
+                if (input.name === 'confirmEmail') {
+                    const email = section.querySelector('input[name="email"]').value;
+                    if (input.value !== email) {
+                        formGroup.classList.add('has-error');
+                        isValid = false;
+                    }
+                }
+
+                // Password validation
+                if (input.name === 'password' && input.value.length < 8) {
+                    formGroup.classList.add('has-error');
+                    isValid = false;
+                }
+
+                // Password confirmation
+                if (input.name === 'confirmPassword') {
+                    const password = section.querySelector('input[name="password"]').value;
+                    if (input.value !== password) {
+                        formGroup.classList.add('has-error');
+                        isValid = false;
+                    }
+                }
+            });
+
+            // Step-specific validation
+            if (step === 2 && orderData.basePrice === 0) {
+                alert('Please select an ID duration');
+                isValid = false;
+            }
+
+            if (step === 3 && orderData.files.length === 0) {
+                alert('Please upload at least one qualifying document');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function nextStep() {
+            if (validateStep(currentStep)) {
+                currentStep++;
+                updateProgress();
+                window.scrollTo(0, 0);
+                
+                // Update final payment summary
+                if (currentStep === 4) {
+                    updateFinalSummary();
+                }
+            }
+        }
+
+        function prevStep() {
+            currentStep--;
+            updateProgress();
+            window.scrollTo(0, 0);
+        }
+
+        // Product selection
+        function selectProduct(type, price) {
+            document.querySelectorAll('.product-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            event.currentTarget.classList.add('selected');
+            const radio = event.currentTarget.querySelector('input[type="radio"]');
+            radio.checked = true;
+            
+            orderData.basePrice = price;
+            updateOrderSummary();
+        }
+
+        // Add-on quantity management
+        function changeQuantity(addon, delta) {
+            const input = document.getElementById(`${addon}-qty`);
+            let currentQty = parseInt(input.value);
+            let newQty = Math.max(0, currentQty + delta);
+            
+            if (addon === 'backup') {
+                newQty = Math.min(1, newQty);
+            }
+            
+            input.value = newQty;
+            orderData.addons[addon] = newQty;
+            updateOrderSummary();
+        }
+
+        // Update order summary
+        function updateOrderSummary() {
+            const addonPrices = {
+                lanyard: 10,
+                protector: 10,
+                luggage: 10,
+                backup: 55
+            };
+
+            let addonsTotal = 0;
+            for (let addon in orderData.addons) {
+                addonsTotal += orderData.addons[addon] * addonPrices[addon];
+            }
+
+            const grandTotal = orderData.basePrice + addonsTotal + orderData.shipping;
+
+            // Update ID selection text
+            const idText = orderData.basePrice === 98 ? 'Two Year ID - $98.00' : 
+                          orderData.basePrice === 78 ? 'One Year ID - $78.00' : 
+                          'Not selected';
+            
+            document.getElementById('selected-id-text').textContent = idText;
+            document.getElementById('addons-total').textContent = `$${addonsTotal.toFixed(2)}`;
+            document.getElementById('grand-total').textContent = `$${grandTotal.toFixed(2)}`;
+        }
+
+        function updateFinalSummary() {
+            const addonPrices = {
+                lanyard: 10,
+                protector: 10,
+                luggage: 10,
+                backup: 55
+            };
+
+            let addonsTotal = 0;
+            for (let addon in orderData.addons) {
+                addonsTotal += orderData.addons[addon] * addonPrices[addon];
+            }
+
+            const grandTotal = orderData.basePrice + addonsTotal + orderData.shipping;
+
+            const idText = orderData.basePrice === 98 ? 'Two Year ID - $98.00' : 
+                          orderData.basePrice === 78 ? 'One Year ID - $78.00' : 
+                          'Not selected';
+            
+            document.getElementById('final-id-text').textContent = idText;
+            document.getElementById('final-addons-total').textContent = `$${addonsTotal.toFixed(2)}`;
+            document.getElementById('final-grand-total').textContent = `$${grandTotal.toFixed(2)}`;
+        }
+
+        // File handling
+        function handleFiles(files) {
+            const fileList = document.getElementById('file-list');
+            
+            Array.from(files).forEach(file => {
+                // Check file size (5MB limit)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert(`${file.name} is too large. Maximum file size is 5MB.`);
+                    return;
+                }
+
+                orderData.files.push(file);
+                
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span>📄 ${file.name} (${(file.size / 1024).toFixed(1)} KB)</span>
+                    <span class="remove-file" onclick="removeFile('${file.name}')">✕</span>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        function removeFile(fileName) {
+            orderData.files = orderData.files.filter(f => f.name !== fileName);
+            const fileList = document.getElementById('file-list');
+            Array.from(fileList.children).forEach(item => {
+                if (item.textContent.includes(fileName)) {
+                    item.remove();
+                }
+            });
+        }
+
+        // Form submission
+        document.getElementById('application-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!validateStep(4)) {
+                return;
+            }
+
+            const submitBtn = document.getElementById('submit-btn');
+            const loading = document.querySelector('.loading');
+            
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+
+            try {
+                // Create payment method with Stripe
+                const {paymentMethod, error} = await stripe.createPaymentMethod({
+                    type: 'card',
+                    card: cardElement,
+                    billing_details: {
+                        name: `${document.querySelector('input[name="firstName"]').value} ${document.querySelector('input[name="lastName"]').value}`,
+                        email: document.querySelector('input[name="email"]').value,
+                        address: {
+                            line1: document.querySelector('input[name="billingAddress"]').value,
+                            city: document.querySelector('input[name="billingCity"]').value,
+                            state: document.querySelector('select[name="billingState"]').value,
+                            postal_code: document.querySelector('input[name="billingZip"]').value,
+                        }
+                    }
+                });
+
+                if (error) {
+                    throw new Error(error.message);
+                }
+
+                // Here you would send the paymentMethod.id to your server
+                // For demo purposes, we'll simulate success
+                await simulatePayment(paymentMethod.id);
+
+                // Show success
+                currentStep = 5;
+                updateProgress();
+                
+                // Populate success message
+                const orderNumber = Math.floor(100000 + Math.random() * 900000);
+                document.getElementById('order-number').textContent = orderNumber;
+                document.getElementById('confirmation-email').textContent = 
+                    document.querySelector('input[name="email"]').value;
+
+            } catch (error) {
+                document.getElementById('card-errors').textContent = error.message;
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+
+        // Simulate payment processing (replace with actual server call)
+        function simulatePayment(paymentMethodId) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    console.log('Payment processed with method:', paymentMethodId);
+                    console.log('Order data:', orderData);
+                    resolve();
+                }, 2000);
+            });
+        }
+
+        // Handle Stripe card errors
+        cardElement.on('change', (event) => {
+            const displayError = document.getElementById('card-errors');
+            if (event.error) {
+                displayError.textContent = event.error.message;
+            } else {
+                displayError.textContent = '';
+            }
+        });
+
+        // Initialize
+        updateProgress();
+    </script>
+</body>
+</html>

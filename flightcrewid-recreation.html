@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Crew ID - Professional Crew Identification</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        /* Header & Navigation */
+        header {
+            background: #1a1a1a;
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+        }
+
+        .logo {
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-img {
+            height: 50px;
+            margin-right: 10px;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 14px;
+            text-transform: uppercase;
+            transition: color 0.3s;
+            padding: 10px 0;
+        }
+
+        nav ul li a:hover {
+            color: #0066cc;
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 5px;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background: #fff;
+            transition: 0.3s;
+        }
+
+        /* Hero Slider */
+        .hero-slider {
+            position: relative;
+            height: 600px;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        .slide-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .slide-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: #fff;
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        .slide-content h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .slide-content h2 {
+            font-size: 64px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .slide-content p {
+            font-size: 20px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: #0066cc;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #0052a3;
+        }
+
+        .slider-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 3;
+        }
+
+        .slider-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .slider-dot.active {
+            background: #fff;
+        }
+
+        /* Alert Banner */
+        .alert-banner {
+            background: #0066cc;
+            color: #fff;
+            text-align: center;
+            padding: 15px;
+            font-size: 16px;
+        }
+
+        .alert-banner a {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .intro-section {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .intro-section p {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #555;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Service Cards */
+        .services {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .service-card {
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .service-card img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+
+        .service-content {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .service-content h2 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: #1a1a1a;
+        }
+
+        .service-content p {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .service-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #fff;
+            color: #0066cc;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            border: 2px solid #0066cc;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #0066cc;
+            color: #fff;
+        }
+
+        /* Footer */
+        footer {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 40px 20px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-section ul li a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-section ul li a:hover {
+            color: #0066cc;
+        }
+
+        .footer-logo {
+            height: 60px;
+            margin-bottom: 15px;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: #999;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            nav ul {
+                position: fixed;
+                left: -100%;
+                top: 80px;
+                flex-direction: column;
+                background: #1a1a1a;
+                width: 100%;
+                text-align: center;
+                transition: 0.3s;
+                padding: 20px 0;
+                gap: 0;
+            }
+
+            nav ul.active {
+                left: 0;
+            }
+
+            nav ul li {
+                margin: 15px 0;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .hero-slider {
+                height: 400px;
+            }
+
+            .slide-content h1 {
+                font-size: 32px;
+            }
+
+            .slide-content h2 {
+                font-size: 42px;
+            }
+
+            .slide-content p {
+                font-size: 16px;
+            }
+
+            .services {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <span>✈️</span> FLIGHT CREW ID
+            </a>
+            <nav>
+                <ul id="nav-menu">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#news">News</a></li>
+                    <li><a href="#benefits">Benefits</a></li>
+                    <li><a href="#testimonials">Testimonials</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                    <li><a href="#login">Login</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Slider -->
+    <section class="hero-slider">
+        <div class="slide active" style="background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="slide-overlay"></div>
+            <div class="slide-content">
+                <h1>Join The</h1>
+                <h2>Flight Crew</h2>
+                <p>Apply For Your Flight Crew ID</p>
+                <a href="#apply" class="btn">Apply Now</a>
+            </div>
+        </div>
+        <div class="slide" style="background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="slide-overlay"></div>
+            <div class="slide-content">
+                <p class="slide-subtitle">The Industry Leading</p>
+                <h2 style="font-size: 54px;">Crew Identification</h2>
+                <h2 style="font-size: 54px;">Solution</h2>
+                <p>For Aviation Professionals</p>
+                <a href="#apply" class="btn">Apply Now</a>
+            </div>
+        </div>
+        <div class="slider-controls">
+            <span class="slider-dot active" data-slide="0"></span>
+            <span class="slider-dot" data-slide="1"></span>
+        </div>
+    </section>
+
+    <!-- Alert Banner -->
+    <div class="alert-banner">
+        ARE YOU A DRONE OPERATOR? <a href="#drone">LEARN MORE</a>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container">
+        <section class="intro-section">
+            <p>
+                Flight Crew ID provides the highest quality and industry leading Crew Identification solution for aviation professionals modeled after Major Airline Crew Badging Systems. We utilize a commercial level full color printing process with amazing clarity to include front and back lamination with security holograms, all printed on a heavy duty Card to include smart RF options. Individuals that can benefit from the Flight Crew ID Badge range from Pilots of all levels (Private, Commercial, Instructor, and ATP), Flight and Cabin Attendants, Dispatchers, Mechanics, Flight Technicians, Military Pilots as well as Retired Airline Pilots.
+            </p>
+        </section>
+
+        <!-- Services -->
+        <div class="services">
+            <div class="service-card">
+                <img src="https://images.unsplash.com/photo-1556388158-158ea5ccacbd?w=800" alt="Aviation Flight Crews">
+                <div class="service-content">
+                    <h2>AVIATION FLIGHT CREWS</h2>
+                    <p>
+                        PILOTS, FLIGHT & CABIN ATTENDANTS,<br>
+                        A&P MECHANICS,<br>
+                        OTHER APPROVED CREWS
+                    </p>
+                    <div class="service-buttons">
+                        <a href="#learn-aviation" class="btn-secondary">Learn More</a>
+                        <a href="#apply-aviation" class="btn">Apply Now</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="service-card">
+                <img src="https://images.unsplash.com/photo-1473968512647-3e447244af8f?w=800" alt="Drone Pilots">
+                <div class="service-content">
+                    <h2>UAV | UAS DRONE REMOTE PILOTS</h2>
+                    <p>
+                        Professional identification for certified drone operators and remote pilots.
+                    </p>
+                    <div class="service-buttons">
+                        <a href="#learn-drone" class="btn-secondary">Learn More</a>
+                        <a href="#apply-drone" class="btn">Apply Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="footer-logo-text">
+                    <span style="font-size: 40px;">✈️</span>
+                    <p style="margin-top: 10px;">Professional Crew Identification Solutions</p>
+                    <p style="margin-top: 15px;"><a href="mailto:info@flightcrewid.com" style="color: #0066cc;">info@flightcrewid.com</a></p>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#terms">Terms & Conditions</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Services</h3>
+                <ul>
+                    <li><a href="#aviation">General Aviation</a></li>
+                    <li><a href="#drones">Drone Operators</a></li>
+                    <li><a href="#benefits">Benefits</a></li>
+                    <li><a href="#testimonials">Testimonials</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2024 Flight Crew ID. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle
+        const hamburger = document.getElementById('hamburger');
+        const navMenu = document.getElementById('nav-menu');
+
+        hamburger.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+
+        // Close menu when clicking a link
+        document.querySelectorAll('nav ul li a').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+            });
+        });
+
+        // Slider functionality
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.slider-dot');
+        let currentSlide = 0;
+
+        function showSlide(n) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            currentSlide = (n + slides.length) % slides.length;
+            
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+        }
+
+        // Auto-advance slider
+        setInterval(() => {
+            showSlide(currentSlide + 1);
+        }, 5000);
+
+        // Manual slider control
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                showSlide(index);
+            });
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - Flight Crew ID</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="logo.png" alt="Flight Crew ID" class="logo-img">
+            </a>
+            <nav>
+                <ul id="nav-menu">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="news.html">News</a></li>
+                    <li><a href="benefits.html">Benefits</a></li>
+                    <li><a href="testimonials.html">Testimonials</a></li>
+                    <li><a href="contact.html" class="active">Contact</a></li>
+                    <li><a href="login.html">Login</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="container">
+        <div class="page-header">
+            <h1>Contact Us</h1>
+            <p>We're here to help! Get in touch with our team</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 40px;">
+            <!-- Contact Form -->
+            <div>
+                <h2 style="margin-bottom: 20px;">Send Us a Message</h2>
+                <form class="contact-form" onsubmit="handleContactSubmit(event)">
+                    <div class="form-group">
+                        <label>Your Name *</label>
+                        <input type="text" name="name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email Address *</label>
+                        <input type="email" name="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" name="phone">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Subject *</label>
+                        <select name="subject" required>
+                            <option value="">Select a subject...</option>
+                            <option value="general">General Inquiry</option>
+                            <option value="application">Application Question</option>
+                            <option value="order">Order Status</option>
+                            <option value="technical">Technical Support</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Message *</label>
+                        <textarea name="message" required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn" style="width: 100%;">Send Message</button>
+                </form>
+            </div>
+
+            <!-- Contact Information -->
+            <div>
+                <h2 style="margin-bottom: 20px;">Contact Information</h2>
+                
+                <div class="content-section">
+                    <h3 style="font-size: 20px; margin-bottom: 10px;">📧 Email</h3>
+                    <p><a href="/cdn-cgi/l/email-protection#325b5c545d72545e5b555a46514057455b561c515d5f" style="color: #0066cc;"><span class="__cf_email__" data-cfemail="630a0d050c23050f0a040b17001106140a074d000c0e">[email&#160;protected]</span></a></p>
+                </div>
+
+                <div class="content-section">
+                    <h3 style="font-size: 20px; margin-bottom: 10px;">⏰ Business Hours</h3>
+                    <p>Monday - Friday: 9:00 AM - 5:00 PM EST<br>
+                    Saturday - Sunday: Closed</p>
+                </div>
+
+                <div class="content-section">
+                    <h3 style="font-size: 20px; margin-bottom: 10px;">💬 Response Time</h3>
+                    <p>We typically respond to all inquiries within 24-48 business hours.</p>
+                </div>
+
+                <div class="content-section">
+                    <h3 style="font-size: 20px; margin-bottom: 10px;">📱 Follow Us</h3>
+                    <p>Stay connected with us on social media for updates and news.</p>
+                </div>
+
+                <div class="content-section">
+                    <h3 style="font-size: 20px; margin-bottom: 10px;">❓ FAQ</h3>
+                    <p>Before contacting us, you might find your answer in our <a href="faq.html" style="color: #0066cc;">Frequently Asked Questions</a>.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="footer-logo-text">
+                    <span style="font-size: 40px;">✈️</span>
+                    <p style="margin-top: 10px;">Professional Crew Identification Solutions</p>
+                    <p style="margin-top: 15px;"><a href="/cdn-cgi/l/email-protection#d3babdb5bc93b5bfbab4bba7b0a1b6a4bab7fdb0bcbe" style="color: #0066cc;"><span class="__cf_email__" data-cfemail="e881868e87a88e84818f809c8b9a8d9f818cc68b8785">[email&#160;protected]</span></a></p>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="terms.html">Terms & Conditions</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="faq.html">FAQ</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Services</h3>
+                <ul>
+                    <li><a href="aviation.html">General Aviation</a></li>
+                    <li><a href="drone.html">Drone Operators</a></li>
+                    <li><a href="benefits.html">Benefits</a></li>
+                    <li><a href="testimonials.html">Testimonials</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2024 Flight Crew ID. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="main.js"></script>
+    <script>
+        function handleContactSubmit(event) {
+            event.preventDefault();
+            const formData = new FormData(
